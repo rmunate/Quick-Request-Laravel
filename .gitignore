@@ -1,0 +1,12 @@
+# Dependencias
+/node_modules
+
+# Archivos de construcción
+/build
+
+# Otros archivos generados
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+docs/.vitepress/cache
+docs/.vitepress/build

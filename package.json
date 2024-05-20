@@ -1,0 +1,30 @@
+{
+  "name": "quick-request-laravel",
+  "version": "1.0.0",
+  "description": "Execute requests easily and quickly to the Laravel backend with QuickRequest, leave Ajax aside, now you have an easy, secure, and modern way of making requests.",
+  "main": "dist/js/quick-request-module.js",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rmunate/QuickRequest-Laravel.git"
+  },
+  "keywords": [
+    "QuickRequest",
+    "Laravel",
+    "Ajax",
+    "Axios"
+  ],
+  "author": "Raul Mauricio Uñate",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rmunate/QuickRequest-Laravel/issues"
+  },
+  "homepage": "https://github.com/rmunate/QuickRequest-Laravel#readme",
+  "devDependencies": {
+    "vitepress": "^1.2.0"
+  }
+}
