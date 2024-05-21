@@ -5,14 +5,14 @@ export default defineConfig({
   description: "Easily consume your endpoints in Laravel. Using Ajax? Discover something even more exciting! 💻✨",
   lang: 'en-US',
   lastUpdated: true,
-  base: '/QuickRequest-Laravel',
+  base: '/Quick-Request-Laravel',
   themeConfig: {
     footer: {
       message: 'Released under the MIT License.',
       copyright: 'Copyright © 2021-2023 Raul Mauricio Uñate'
     },
     editLink: {
-      pattern: 'https://github.com/rmunate/QuickRequest-Laravel/tree/main/docs/:path'
+      pattern: 'https://github.com/rmunate/Quick-Request-Laravel/tree/main/docs/:path'
     },
     logo: '/img/quick-request.png',
     nav: [
@@ -53,7 +53,7 @@ export default defineConfig({
       }
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/rmunate/QuickRequest-Laravel' }
+      { icon: 'github', link: 'https://github.com/rmunate/Quick-Request-Laravel' }
     ],
     search: {
       provider: 'local'
@@ -62,23 +62,23 @@ export default defineConfig({
   head: [
     ['link', {
       rel: 'stylesheet',
-      href: '/QuickRequest-Laravel/css/style.css'
+      href: '/Quick-Request-Laravel/css/style.css'
     }
     ],
     ['link', {
       rel: 'icon',
-      href: '/QuickRequest-Laravel/img/quick-request.png',
+      href: '/Quick-Request-Laravel/img/quick-request.png',
       type: 'image/png'
     }
     ],
     ['meta', {
       property: 'og:image',
-      content: '/QuickRequest-Laravel/img/logo-github.png'
+      content: '/Quick-Request-Laravel/img/logo-github.png'
     }
     ],
     ['meta', {
       property: 'og:image:secure_url',
-      content: '/QuickRequest-Laravel/img/logo-github.png'
+      content: '/Quick-Request-Laravel/img/logo-github.png'
     }
     ],
     ['meta', {
@@ -93,7 +93,7 @@ export default defineConfig({
     ],
     ['meta', {
       property: 'og:title',
-      content: 'QuickRequest-Laravel'
+      content: 'Quick-Request-Laravel'
     }
     ],
     ['meta', {
@@ -103,7 +103,7 @@ export default defineConfig({
     ],
     ['meta', {
       property: 'og:url',
-      content: 'https://rmunate.github.io/QuickRequest-Laravel/'
+      content: 'https://rmunate.github.io/Quick-Request-Laravel/'
     }
     ],
     ['meta', {
