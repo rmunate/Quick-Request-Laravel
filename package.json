@@ -1,6 +1,6 @@
 {
   "name": "quick-request-laravel",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Execute requests easily and quickly to the Laravel backend with QuickRequest, leave Ajax aside, now you have an easy, secure, and modern way of making requests.",
   "main": "dist/js/quick-request-module.js",
   "scripts": {
