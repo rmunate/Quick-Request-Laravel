@@ -1,6 +1,7 @@
 # QuickRequest Laravel
 
-![logo-spell-number](https://raw.githubusercontent.com/rmunate/Quick-Request-Laravel/main/docs/public/img/quick-request-banner.png)
+![Banner de Quick Request](https://rmunate.github.io/Quick-Request-Laravel/img/quick-request-banner.png "Quick Request")
+
 
 ## Introduction
 
