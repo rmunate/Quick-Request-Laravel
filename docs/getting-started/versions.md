@@ -12,5 +12,5 @@ Currently, these are the versions of this package.
 
 | Version                                                | Release Date | End of Support Date |
 |--------------------------------------------------------|--------------|---------------------|
-| ^0.1 &nbsp; <Badge type="danger" text='Deprecated' />  | 2021-10-21   | 2021-12-31          |
-| ^1.0 &nbsp; <Badge type="tip" text='Current' />        | 2022-01-01   | 2024-12-31          |
+| ^0.1 &nbsp; <Badge type="danger" text='Deprecated' />  | 2021-10-21   | 2022-12-31          |
+| ^1.0 &nbsp; <Badge type="tip" text='Current' />        | 2023-01-01   | 2024-12-31          |

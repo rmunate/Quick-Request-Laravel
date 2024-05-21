@@ -16,21 +16,39 @@ export default defineConfig({
     },
     logo: '/img/quick-request.png',
     nav: [
-      { text: 'v1.0.0', link: '/' }
+      { text: 'v1.0.3', link: '/' }
     ],
     sidebar: [
       {
         items: [
-          { text: 'Introduction', link: '/introduction/introduction' }
+          { text: 'What is QuickRequest?', link: '/introduction/introduction' }
         ]
       },
       {
         text: 'Getting Started',
         collapsed: true,
         items: [
-          { text: 'Install', link: '/getting-started/install' },
-          { text: 'Version', link: '/getting-started/versions' },
-          { text: 'Changelog', link: '/getting-started/changelog' },
+          { text: 'Installation', link: '/getting-started/install' },
+          { text: 'Versions', link: '/getting-started/versions' },
+          { text: 'Release Notes', link: '/getting-started/changelog' },
+        ]
+      },
+      {
+        text: 'Usage',
+        collapsed: true,
+        items: [
+          { text: 'General Structure', link: '/usage/general-structure' },
+          { text: 'Examples', link: '/usage/examples' },
+          { text: 'BLOB', link: '/usage/blobs' },
+          { text: 'RunTime Exceptions', link: '/usage/exceptions' },
+          { text: 'Read Errors', link: '/usage/laravel-errors' },
+        ]
+      },{
+        text: 'Contribute',
+        collapsed: true,
+        items: [
+            {text: 'Bug Report', link: '/contribute/report-bugs'},
+            {text: 'Contribution', link: '/contribute/contribution'}
         ]
       }
     ],

@@ -15,10 +15,10 @@ For this, QuickRequest always returns the same error structure, regardless of wh
 Below is the structure that the value passed to the `error` function looks like:
 
 ```javascript
-QuickRequest().get({ 
+QuickRequest().get({
     //...
-    error: function(err){
-        console.log(err);
+    error: function(response, data, code){
+        console.log(data);
     },
     //...
 });
@@ -26,24 +26,22 @@ QuickRequest().get({
 
 Browser Console Output:
 
-```shell
+```javascript
 {
-    "data": {
-        "errors": {
-            "Exception": [
-                "Class \"App\\Http\\Controllers\\Records\" not found"
-            ]
-        },
-        "message": "Exception"
-    },
-    "success": false,
-    "code": 500
+    "message" : "Main error message."
+    "errors" : {
+        "First Error" : [
+            "First Description Error",
+            "Second Description Error",
+        ]
+    }
 }
 ```
 
 Where,
-- `success`: always `FALSE`.
-- `code`: contains the error code `419`, `500`, etc.
+- `code`: contains the error code such as `419`, `500`, etc.
+- `data`: contains the errors generated in the backend by a FormRequest, TryCatch block, or unhandled exceptions.
+- `response`: contains the entire response including Headers and more.
 
 The `data` property will always contain two properties:
 - `message`: This property contains the main error.
@@ -53,75 +51,22 @@ An important thing is how you should return errors from controllers to make read
 
 ```php
 try {
-    
+
     //...
 
 } catch (\Throwable $th) {
 
     return response()->json([
-        "Exception" => $th->getMessage(),
-        // "Error 2" => "Message Error",
-        // "Other Errors" => [
-        //     'Sub Message Error 1',
-        //     'sub Message Error 2'
+        "message" => $th->getMessage(),
+        // "errors" => [
+        //     "First Error" => [
+        //         "First Description Error",
+        //         "Second Description Error",
+        //     ]
         // ],
-    ], 500);
+    ], $th->getCode());
 
 }
 ```
 
 Simply, if you notice, it's an indexed array.
-
-**Convert Them to an Array**
-
-If you need to work with an array instead of an object, perhaps to iterate and print errors in a list, you may find it convenient to use `QuickRequestErrors`. It's a simple utility to convert the error object into an array of objects.
-
-Executing this:
-
-```javascript
-QuickRequest().get({ 
-    //...
-    error: function(err){
-        console.log(
-            QuickRequestErrors.setErrors(err.data.errors).toArray()
-        );
-    },
-    //...
-});
-```
-
-Now you'll get the following output:
-
-```shell
-[
-    {
-        "Exception": [
-            "Class \"App\\Http\\Controllers\\Record\" not found"
-        ]
-    }
-]
-```
-
-You might prefer a flattened array; you can achieve it easily like this:
-
-```javascript
-QuickRequest().get({ 
-    //...
-    error: function(err){
-        console.log(
-            QuickRequestErrors.setErrors(err.data.errors).toArrayflatten()
-        );
-    },
-    //...
-});
-```
-
-Now the output is clearer and easier to handle with a loop:
-
-```shell
-[
-    {
-        "Exception": "Class \"App\\Http\\Controllers\\Record\" not found"
-    }
-]
-```

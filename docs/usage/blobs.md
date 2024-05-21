@@ -35,14 +35,14 @@ To create a file-upload form, structure it as follows:
 In this case, always use `form` as the data source for QuickRequest:
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     url: '/upload-image',
     form: 'uploadFile',
-    success: function(res){
+    success: function(response, data, code){
         console.log("Successful Process");
     },
-    error: function(err){
-        console.error("Error: " + err.data.message);
+    error: function(response, data, code){
+        console.error("Error: " + data.message);
     }
 });
 ```
@@ -90,19 +90,19 @@ const nameImage = 'LaravelLogo';
 QuickRequest().get({
     url: '/image/' + nameImage,
     expect: 'blob', // Mandatory
-    success: function (res) {
+    success: function (response, data, code) {
         /**
          * To download the file, simply
          * Use the QuickRequestBlobs object that facilitates
          * the action.
          */
-        QuickRequestBlobs.setBlob(res.data)    // Always arrives at this position the blob
-                         .setName("Test")      // Preferably without spaces.
-                         .setExtension("jpeg") // Lowercase extension without the dot.
+        QuickRequestBlobs.setBlob(data)         // Always arrives at this position the blob
+                         .setName(nameImage)    // Preferably without spaces.
+                         .setExtension("jpeg")  // Lowercase extension without the dot.
                          .download();
     },
-    error: function (err) {
-        console.error("Error: " + err.data.message);
+    error: function (response, data, code) {
+        console.error("Error: " + data.message);
     }
 });
 ```

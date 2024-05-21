@@ -56,11 +56,11 @@ const idRecord = 10;
  */
 QuickRequest().get({
     url: '/record/' + idRecord,
-    success: function (res) {
-        console.log("Successful Process, Data: ", res.data);
+    success: function (response, data, code) {
+        console.log("Successful Process, Data: ", data);
     },
-    error: function (err) {
-        console.error("Error: " + err.data.message);
+    error: function (response, data, code) {
+        console.error(data);
     }
 });
 ```
@@ -84,13 +84,12 @@ public function findImage($name)
      * in the public folder.
      */
     $pathToImage = public_path($name . ".jpeg");
-    $imageContents = file_get_contents($pathToImage);
 
     /**
      * Return the image as a "Binary Large Object" (Blob).
      * Important to define ->header('Content-Type', ?)
      */
-    return response($imageContents, 200)->header('Content-Type', 'image/jpeg');
+    return response(file_get_contents($pathToImage), 200)->header('Content-Type', 'image/jpeg');
 }
 ```
 
@@ -104,19 +103,19 @@ const nameImage = 'LaravelLogo';
 QuickRequest().get({
     url: '/image/' + nameImage,
     expect: 'blob', // Mandatory
-    success: function (res) {
+    success: function (response, data, code) {
         /**
          * To download the file, simply
          * Use the QuickRequestBlobs object that facilitates
          * the action.
          */
-        QuickRequestBlobs.setBlob(res.data)    // Always arrives at this position the blob
-                         .setName("Test")      // Preferably without spaces.
+        QuickRequestBlobs.setBlob(data)  // Always arrives at this position the blob
+                         .setName(nameImage)   // Preferably without spaces.
                          .setExtension("jpeg") // Lowercase extension without the dot.
                          .download();
     },
-    error: function (err) {
-        console.error("Error: " + err.data.message);
+    error: function (response, data, code) {
+        console.error(data);
     }
 });
 ```
@@ -178,11 +177,11 @@ QuickRequest().get({
             tag: document.getElementById('tag').value,
         };
     },
-    success: function (res) {
-        console.log("Successful Process, Data: ", res.data);
+    success: function (response, data, code) {
+        console.log("Successful Process, Data: ", data);
     },
-    error: function (err) {
-        console.error("Error: " + err.data.message);
+    error: function (response, data, code) {
+        console.error("Error: " + data.message);
     }
 });
 ```
@@ -213,7 +212,7 @@ public function store(Request $request)
         $record->owner = $request->owner;
         $record->tag = $request->tag;
         $record->save();
-        
+
         DB::commit();
 
         return response()->json([
@@ -221,12 +220,18 @@ public function store(Request $request)
         ], 201);
 
     } catch (\Throwable $th) {
-        
+
         DB::rollback();
 
         return response()->json([
-            "Exception" => $th->getMessage(),
-        ], 500);
+            "message" => $th->getMessage(),
+            // "errors" => [
+            //     "First Error" => [
+            //         "First Description Error",
+            //         "Second Description Error",
+            //     ]
+            // ],
+        ], $th->getCode());
     }
 }
 ```
@@ -240,17 +245,17 @@ Remember that you can add the `eventListener` capability to QuickRequest to trig
  * Depending on the case, you should use
  * "form" when the data comes from a form
  * "data" when specific data needs to be sent.
- * 
+ *
  * In this example, we will use "form".
  */
-QuickRequest().post({ 
+QuickRequest().post({
     url: '/record',
-    form: 'idForm',
-    success: function(res){
+    form: 'id_form',
+    success: function(response, data, code){
         console.log("Successful Process");
     },
-    error: function(err){
-        console.error("Error: " + err.data.message);
+    error: function(response, data, code){
+        console.error("Error: " + data.message);
     }
 });
 ```
@@ -276,14 +281,14 @@ To create a file-upload form, structure it as follows:
 In this case, always use `form` as the data source for QuickRequest:
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     url: '/record',
     form: 'uploadFile',
-    success: function(res){
+    success: function(response, data, code){
         console.log("Successful Process");
     },
-    error: function(err){
-        console.error("Error: " + err.data.message);
+    error: function(response, data, code){
+        console.error("Error: " + data.message);
     }
 });
 ```
@@ -319,12 +324,18 @@ public function replace(Request $request, $id)
         ], 200);
 
     } catch (\Throwable $th) {
-        
+
         DB::rollback();
 
         return response()->json([
-            "Exception" => $th->getMessage(),
-        ], 500);
+            "message" => $th->getMessage(),
+            // "errors" => [
+            //     "First Error" => [
+            //         "First Description Error",
+            //         "Second Description Error",
+            //     ]
+            // ],
+        ], $th->getCode());
     }
 }
 ```
@@ -338,13 +349,13 @@ Remember that you can add the `eventListener` capability to QuickRequest to trig
  * Depending on the case, you should use
  * "form" when the data comes from a form
  * "data" when specific data needs to be sent.
- * 
+ *
  * In this example, we will use "data".
  */
 
 const idRecord = 10;
 
-QuickRequest().put({ 
+QuickRequest().put({
     url: '/record/' + idRecord,
     data: function () {
         return {
@@ -353,11 +364,11 @@ QuickRequest().put({
             tag: document.getElementById('tag').value,
         };
     },
-    success: function(res){
+    success: function(response, data, code){
         console.log("Successful Process");
     },
-    error: function(err){
-        console.error("Error: " + err.data.message);
+    error: function(response, data, code){
+        console.error("Error: " + data.message);
     }
 });
 ```
@@ -381,8 +392,7 @@ public function update(Request $request, $id)
 
     try {
 
-        $record = Record::find($id);
-        $record->update($request->only(['tag']));
+        Record::find($id)->update($request->only(['tag']));
 
         DB::commit();
 
@@ -391,12 +401,18 @@ public function update(Request $request, $id)
         ], 200);
 
     } catch (\Throwable $th) {
-        
+
         DB::rollback();
 
         return response()->json([
-            "Exception" => $th->getMessage(),
-        ], 500);
+            "message" => $th->getMessage(),
+            // "errors" => [
+            //     "First Error" => [
+            //         "First Description Error",
+            //         "Second Description Error",
+            //     ]
+            // ],
+        ], $th->getCode());
     }
 }
 ```
@@ -410,24 +426,24 @@ Remember that you can add the `eventListener` capability to QuickRequest to trig
  * Depending on the case, you should use
  * "form" when the data comes from a form
  * "data" when specific data needs to be sent.
- * 
+ *
  * In this example, we will use "data".
  */
 
 const idRecord = 10;
 
-QuickRequest().patch({ 
+QuickRequest().patch({
     url: '/record/' + idRecord,
     data: function () {
         return {
             tag: document.getElementById('tag').value,
         };
     },
-    success: function(res){
+    success: function(response, data, code){
         console.log("Successful Process");
     },
-    error: function(err){
-        console.error("Error: " + err.data.message);
+    error: function(response, data, code){
+        console.error("Error: " + data.message);
     }
 });
 ```
@@ -451,8 +467,7 @@ public function destroy($id)
 
     try {
 
-        $record = Record::find($id);
-        $record->delete();
+        Record::find($id)->delete();
 
         DB::commit();
 
@@ -461,12 +476,18 @@ public function destroy($id)
         ], 200);
 
     } catch (\Throwable $th) {
-        
+
         DB::rollback();
 
         return response()->json([
-            "Exception" => $th->getMessage(),
-        ], 500);
+            "message" => $th->getMessage(),
+            // "errors" => [
+            //     "First Error" => [
+            //         "First Description Error",
+            //         "Second Description Error",
+            //     ]
+            // ],
+        ], $th->getCode());
     }
 }
 ```
@@ -480,19 +501,19 @@ Remember that you can add the `eventListener` capability to QuickRequest to trig
  * Depending on the case, you should use
  * "form" when the data comes from a form
  * "data" when specific data needs to be sent.
- * 
+ *
  * In this example, we will use "data".
  */
 
 const idRecord = 10;
 
-QuickRequest().delete({ 
+QuickRequest().delete({
     url: '/record/' + idRecord,
-    success: function(res){
+    success: function(response, data, code){
         console.log("Successful Process");
     },
-    error: function(err){
-        console.error("Error: " + err.data.message);
+    error: function(response, data, code){
+        console.error("Error: " + data.message);
     }
 });
 ```

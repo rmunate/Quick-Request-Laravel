@@ -11,19 +11,19 @@ QuickRequest features a clean and easy-to-implement syntax designed to simplify 
 Let's explore the simple structure of QuickRequest:
 
 ```javascript
-QuickRequest().get({ 
-    url: '/slug/1', 
+QuickRequest().get({
+    url: '/slug/1',
     expect: 'JSON',
     before: function(){
         //...
     },
-    success: function(res){
+    success: function(response, data, code){
         //...
     },
-    error: function(err){
+    error: function(response, data, code){
         //...
     },
-    after: function(full){
+    after: function(response, data, code){
         //...
     },
 });
@@ -111,11 +111,11 @@ Some other headers where TEXT should be expected.
 QuickRequest().get({
     //...
     expect: "BLOB"
-    success: function(res){
+    success: function(response, data, code){
 
         // Download File.
-        QuickRequestBlobs.setBlob(res.data)
-                         .setName("Image")
+        QuickRequestBlobs.setBlob(data)
+                         .setName("Photo")
                          .setExtension("jpeg")
                          .download();
     },
@@ -127,10 +127,8 @@ In controllers, you should use a return statement where you specify the headers 
 
 ```php
 $pathToImage = public_path('image.jpeg');
-$imageContents = file_get_contents($pathToImage);
 
-return response($imageContents, 200)
-            ->header('Content-Type', 'image/jpeg');
+return response(file_get_contents($pathToImage), 200)->header('Content-Type', 'image/jpeg');
 ```
 
 Here are some common headers:
@@ -157,7 +155,7 @@ QuickRequest expects the URL value to be what comes after the domain, meaning:
 
 ```javascript
 /**
- * When working with Ajax or Axios, you need to 
+ * When working with Ajax or Axios, you need to
  * pass the entire URL like this:
  */
 const url = "https://sub.domain/custom-slug/10"
@@ -174,7 +172,7 @@ const url = "/custom-slug/10"
 In other words, the actual usage would be:
 
 ```javascript
-QuickRequest().get({ 
+QuickRequest().get({
     url: '/custom-slug/10',
     //...
 });
@@ -201,9 +199,9 @@ Your form must have the `id` assigned:
 This `ID` should be the value of the `form` property:
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     //...
-    form: 'myForm'
+    form: 'id_form'
     //...
 });
 ```
@@ -214,8 +212,8 @@ If you don't want to send form data but instead want to send specific data, then
 
 ```javascript
 
-// Estatic Data
-QuickRequest().post({ 
+// Estatic Data (This is to take values that do not change in the context of use.)
+QuickRequest().post({
     //...
     data: {
         key1: 'value1',
@@ -224,13 +222,25 @@ QuickRequest().post({
     //...
 });
 
-// Dinamic Data
-QuickRequest().post({ 
+// Dinamic Data (This is used to obtain the value of the selector at the time QuickRequest is executed)
+QuickRequest().post({
     //...
     data: function () {
         return {
             key1: document.getElementById('value1').value,
             key2: document.getElementById('value1').value,
+        };
+    },
+    //...
+});
+
+// Generate Previous Data (Values generated within the confirmation block "use later")
+QuickRequest().post({
+    //...
+    data: function (me) {
+        return {
+            key1: me.value1,
+            key2: me.value2
         };
     },
     //...
@@ -242,9 +252,9 @@ QuickRequest().post({
 Yes, if your case is that you need to add some values to the form data, then you can use both properties at the same time:
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     //...
-    form: 'myForm',
+    form: 'id_form',
     data: function () {
         return {
             key1: document.getElementById('value1').value,
@@ -262,7 +272,7 @@ Ensure that values are not overwritten when using the same name for an input wit
 If you need to define specific headers in the request, you can easily do so using the `Headers` property. QuickRequest typically assigns headers automatically, but if you find it necessary, you can apply them manually.
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     //...
     headers: {
         'Content-Type': 'application/json'
@@ -278,7 +288,7 @@ This allows you to customize headers as needed for your specific requests.
 If you need to perform any actions before sending the request to the backend, such as activating a spinner, displaying a preload on the web, showing notifications, or disabling buttons, you can easily achieve this with the `before` function:
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     //...
     before: function(){
         const buttonSubmit = document.getElementById('btn-submit');
@@ -290,17 +300,34 @@ QuickRequest().post({
 This method is not mandatory.
 You can execute any type of action prior to sending the request.
 
+This method can also optionally receive the parameter me: `before: function(me){...`
+
 ## Successful Response
 
 If the response is successful, you can retrieve the values from the response using the `success` function.
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     //...
-    success: function(res){
-        const data = res.data; //{[...]}
-        const success = res.success; //true
-        const httpStatusCode = res.code; //200
+    success: function(response, data, code){
+
+        console.log(code)
+        /* 200 - 201 ... */
+
+        console.log(data)
+        /* {key: value} */
+
+        console.log(response)
+        /*
+        {
+            data: {key: value},
+            success: true,
+            status: 200,
+            statusText: "OK",
+            headers: {...},
+            url: 'http://...'
+        }
+        */
     },
     //...
 });
@@ -315,12 +342,45 @@ If an error occurs or the response is returned with an HTTP error code, then the
 It's important to note that regardless of how errors are returned from the backend, you will always receive them in the same format. This ensures standardized error handling in JavaScript and addresses the lack of a consistent error return standard from the framework.
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     //...
-    error: function(err){
-        const errorMessage = err.data.message; // Main Exception Message
-        const errorsList = res.data.errors; // List of errors
-        const httpStatusCode = res.code; // 500 and others
+    error: function(response, data, code){
+
+        console.log(code)
+        /* 400 - 500 ... */
+
+        console.log(data)
+        /*
+        {
+            "message" : "Main error message."
+            "errors" : {
+                "First Error" : [
+                    "First Description Error",
+                    "Second Description Error",
+                ]
+            }
+        }
+        */
+
+        console.log(response)
+        /*
+        {
+            data: {
+                "message" : "Main error message."
+                "errors" : {
+                    "First Error" : [
+                        "First Description Error",
+                        "Second Description Error",
+                    ]
+                }
+            },
+            success: false,
+            status: 400,
+            statusText: "Bad Request",
+            headers: {...},
+            url: 'http://...'
+        }
+        */
     },
     //...
 });
@@ -330,18 +390,20 @@ It's important but not mandatory that when returning errors from the Laravel bac
 
 ```php
 try {
-    
+
     //...
 
 } catch (\Throwable $th) {
 
     return response()->json([
-        "Exception" => $th->getMessage(),
-        "Other Errors" => [
-            'Error 1',
-            'Error 2'
-        ],
-    ], 500);
+        "message" => $th->getMessage(),
+        // "errors" => [
+        //     "First Error" => [
+        //         "First Description Error",
+        //         "Second Description Error",
+        //     ]
+        // ],
+    ], $th->getCode());
 
 }
 ```
@@ -351,12 +413,29 @@ try {
 Just as you have the ability to execute any action before sending the request to the backend, you can also perform any action after the request has been completed. In this function, you will have access to the response, whether it's successful or contains errors from the backend. This can be useful if you need these details to condition your actions.
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     //...
-    after: function(full){
-        const httpStatusCode = full.code;
-        const dataOrErrors = full.data;
-        const successOrFail = full.success;
+    after: function(response, data, code){
+
+        // - Here you will have access to the success or error data as the case may be.
+
+        console.log(code)
+        /* 200 - 201 ... */
+
+        console.log(data)
+        /* {key: value} */
+
+        console.log(response)
+        /*
+        {
+            data: {key: value},
+            success: true,
+            status: 200,
+            statusText: "OK",
+            headers: {...},
+            url: 'http://...'
+        }
+        */
     },
     //...
 });
@@ -375,20 +454,21 @@ Below, you will find two possible ways to execute a backend request only when a 
 You can trigger an event in the conventional way provided by JavaScript and simply specify that QuickRequest makes the request only if the event is fulfilled.
 
 ```javascript
-document.getElementById('myForm').addEventListener('submit', function(event) {
+document.getElementById('id_form').addEventListener('submit', function(event) {
+
     event.preventDefault();
 
-    QuickRequest().get({ 
-        url: '/slug/1', 
+    QuickRequest().get({
+        url: '/slug/1',
         expect: 'JSON',
-        success: function(res){
+        success: function(response, data, code){
             //...
         },
-        error: function(err){
+        error: function(response, data, code){
             //...
         },
     });
-    
+
 });
 ```
 
@@ -397,13 +477,13 @@ document.getElementById('myForm').addEventListener('submit', function(event) {
 The previous approach can be easily streamlined using QuickRequest's own methods. Here is the same scenario but more compact and in the QuickRequest style:
 
 ```javascript
-QuickRequest().eventListener('submit','#myform').preventDefault().get({ 
-    url: '/slug/1', 
+QuickRequest().eventListener('submit','#id_form').preventDefault().get({
+    url: '/slug/1',
     expect: 'JSON',
-    success: function(res){
+    success: function(response, data, code){
         //...
     },
-    error: function(err){
+    error: function(response, data, code){
         //...
     },
 });
@@ -421,13 +501,13 @@ Here's how:
 
 ```javascript
 // Activate the event
-const submitForm = QuickRequest().eventListener('submit','#myform').preventDefault().get({ 
-    url: '/slug/1', 
+const submitForm = QuickRequest().eventListener('submit','#id_form').preventDefault().get({
+    url: '/slug/1',
     expect: 'JSON',
-    success: function(res){
+    success: function(response, data, code){
         //...
     },
-    error: function(err){
+    error: function(response, data, code){
         //...
     },
 });
@@ -444,34 +524,70 @@ submitForm.removeEventListener();
 If you, for example, want to display a confirmation window before sending the request to the backend, QuickRequest can provide this solution. Through the `confirm` method, you can create the logic you need to ask the user for confirmation of the action to be performed. If this method returns `true`, the action will be executed; otherwise, no action will be taken.
 
 ```javascript
-QuickRequest().eventListener('submit','#myform').preventDefault().confirm(function(){
+QuickRequest().eventListener('submit','#id_form').preventDefault().confirm(function(){
 
     /**
-     * You could, for example, use SweetAlert2 to request 
+     * You could, for example, use SweetAlert2 to request
      * confirmation or something similar.
-     * 
+     *
      * True execute the event, False stops it
      */
     return true;
 
-}).get({ 
-    url: '/slug/1', 
+}).get({
+    url: '/slug/1',
     expect: 'JSON',
-    success: function(res){
+    success: function(response, data, code){
         //...
     },
-    error: function(err){
+    error: function(response, data, code){
         //...
     },
 });
 ```
+
+There may be cases where you need to use values generated in this function, so you can use `me`
+
+```javascript
+QuickRequest().eventListener('submit','#id_form').preventDefault().confirm(function(me){
+
+    /**
+     * You could, for example, use SweetAlert2 to request
+     * confirmation or something similar.
+     *
+     * True execute the event, False stops it
+     */
+    me.name = 'example'
+
+    return true;
+
+}).get({
+    url: '/slug/1',
+    expect: 'JSON',
+    data: function(me){
+        return {
+            "name" : me.name
+        }
+    },
+    befere: function(me){
+        alert(me.name)
+    },
+    success: function(response, data, code){
+        //...
+    },
+    error: function(response, data, code){
+        //...
+    },
+});
+```
+
 
 ## Other Options
 
 If needed, you also have the following options available:
 
 ```javascript
-QuickRequest().post({ 
+QuickRequest().post({
     //...
     mode: 'cors', // no-cors, *cors, same-origin
     cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
