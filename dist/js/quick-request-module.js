@@ -1,5 +1,5 @@
 /**
- * QuickRequest v1.0.0
+ * QuickRequest v1.1.0
  * Script
  * (c) Raul Mauricio Uñate Castro
  * https://github.com/rmunate
@@ -460,6 +460,7 @@ class QuickRequestFetch {
         this.config.baseUrl = `${window.location.protocol}//${window.location.host}/`;
         this.config.formData = new FormData();
         this.config.hasFile = false;
+        this.custom = {}
 
         /* Execute the request sending process */
         this.dispatch();
@@ -532,7 +533,7 @@ class QuickRequestFetch {
 
             //Validar si es un callback
             if (typeof this.config.options.data === 'function') {
-                originData = this.config.options.data()
+                originData = this.config.options.data(this.custom)
             } else {
                 originData = this.config.options.data || null;
             }
@@ -646,7 +647,7 @@ class QuickRequestFetch {
      */
     dispatch(){
         if (typeof this.config.confirm === 'function') {
-            if (this.config.confirm() === true) {
+            if (this.config.confirm(this.custom) === true) {
                 this.send();
             }
         } else {
@@ -664,12 +665,14 @@ class QuickRequestFetch {
 
         /* Execute Pre-request Function */
         if (this.config.options.before && typeof this.config.options.before === "function") {
-            this.config.options.before();
+            this.config.options.before(this.custom);
         }
 
         /* Response values */
-        let success = {};
-        let errors = {};
+        let custom_response;
+        let custom_data;
+        let custom_status;
+        let errors;
         let responseJSON;
 
         /* Determine the method to send the request to the server */
@@ -686,99 +689,120 @@ class QuickRequestFetch {
                 responseJSON = response.statusText;
             }
 
-            /* Standar Struct Errors */
-            let errors = {}, message;
+            if(typeof responseJSON == 'string'){
 
-            if (responseJSON.hasOwnProperty('exception') && responseJSON.hasOwnProperty('file') && responseJSON.hasOwnProperty('message')) {
-
-                message = `File: ${QuickRequestHelpers.extractLastSegment(responseJSON.file)} - Line: ${responseJSON?.line} - Exception: ${responseJSON.message}`;
-
-                responseJSON.trace.forEach(element => {
-
-                    let file = QuickRequestHelpers.extractLastSegment(element.file);
-
-                    if (!QuickRequestHelpers.isValueEmpty(file)) {
-                        errors[QuickRequestHelpers.extractLastSegment(element.file)] = [`Line: ${element?.line}, File: ${element?.file}, Function: ${element?.function}`];
-                    }
-                });
-
-
-                responseJSON = {
-                    errors,
-                    message
+                errors = {
+                    "message" : responseJSON,
+                    "errors" : []
                 }
 
-            } else if (!responseJSON.hasOwnProperty('errors')) {
+            } else {
 
-                if (typeof responseJSON === 'object' && Object.keys(responseJSON).length > 0) {
+                if (responseJSON.hasOwnProperty('exception') && responseJSON.hasOwnProperty('file') && responseJSON.hasOwnProperty('message')) {
 
-                    let i = 0;
-                    for (const [key, value] of Object.entries(responseJSON)) {
-                        errors[key] = Array.isArray(value) ? value : [value];
-                        if (i == 0) {
-                            message = key;
+                    errors = {
+                        "message" : responseJSON.message,
+                        "errors" : []
+                    }
+
+                    responseJSON.trace.forEach(element => {
+                        if(element.class){
+                            errors.errors[`${element.class}:${element.line}`] = [`${element.file}${element.type}${element.function}`]
                         }
-                        i++;
-                    }
+                    });
 
-                    const moreErrors = i - 1;
-                    if (moreErrors >= 1) {
-                        message += ". (and "+ (i-1) +" more error)";
-                    }
+                } else if (typeof responseJSON === 'object' && Object.keys(responseJSON).length > 0) {
 
+                    errors = {
+                        "message" : responseJSON.message || response.statusText,
+                        "errors" : responseJSON.errors || []
+                    }
                 } else {
-                    errors[responseJSON] = [responseJSON];
-                    message = Array.isArray(responseJSON) ? responseJSON[0] : responseJSON
+
+                    errors = {
+                        "message" : response.statusText,
+                        "errors" : []
+                    }
+
                 }
 
-                responseJSON = {
-                    errors,
-                    message
+                custom_response = {
+                    data: errors,
+                    success: response.ok,
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers,
+                    url: response.url
                 }
-            }
 
-            errors = {
-                data: responseJSON,
-                success: response.ok,
-                code: response.status,
+                custom_data = errors
+
+                custom_status = response.status
             }
 
             if (this.config.options.error && typeof this.config.options.error === "function") {
-                this.config.options.error(errors);
+                this.config.options.error(custom_response, custom_data, custom_status);
             }
 
         } else {
 
             try {
+
                 if (this.config.expect.toLowerCase().trim() == "json") {
-                    responseJSON = await response.json();
+
+                    try {
+                        responseJSON = await response.json();
+                    } catch (error) {
+                        responseJSON = null
+                    }
+
                 } else if (this.config.expect.toLowerCase().trim() == "text") {
-                    responseJSON = await response.text();
+
+                    try {
+                        responseJSON = await response.text();
+                    } catch (error) {
+                        responseJSON = null
+                    }
+
                 } else if (this.config.expect.toLowerCase().trim() == "blob") {
-                    responseJSON = await response.blob();
+
+                    try {
+                        responseJSON = await response.blob();
+                    } catch (error) {
+                        responseJSON = null
+                    }
+
                 } else {
+
                     throw new Error("Only the values 'json', 'blob' or 'text' are allowed for the 'expect' property.");
+
                 }
+
             } catch (error) {
+
                 throw new QuickRequestException(error.message)
+
             }
 
-            success = {
+            custom_response = {
                 data: responseJSON,
                 success: response.ok,
-                code: response.status,
+                status: response.status,
+                statusText: response.statusText,
+                headers: response.headers,
+                url: response.url
             }
 
-            this.config.options.success(success);
+            custom_data = responseJSON
+
+            custom_status = response.status
+
+            this.config.options.success(custom_response, custom_data, custom_status);
         }
 
         // Execute Post-request Function
         if (this.config.options.after && typeof this.config.options.after === "function") {
-            this.config.options.after({
-                success: response.ok,
-                data: responseJSON,
-                code: response.status,
-            });
+            this.config.options.after(custom_response, custom_data, custom_status);
         }
     }
 }
@@ -935,52 +959,6 @@ const QuickRequestBlobs = {
         downloadLink.dispatchEvent(event);
     },
 };
-
-/**
- * --------------------------
- * Errors Manager.
- * --------------------------
- */
-const QuickRequestErrors = {
-
-    config: {
-        errors: {},
-    },
-
-    setErrors: function(errors){
-        this.config.errors = errors;
-        return this;
-    },
-
-    toArray: function(){
-        let errors = [];
-        for (const [key, value] of Object.entries(this.config.errors)) {
-            errors.push({
-                [key]: value
-            })
-        }
-        return errors;
-    },
-
-    toArrayflatten: function(){
-        let errors = [];
-        for (const [key, value] of Object.entries(this.config.errors)) {
-            if (Array.isArray(value)) {
-                value.forEach(element => {
-                    errors.push({
-                        [key]: element
-                    })
-                });
-            } else {
-                errors.push({
-                    [key]: value
-                })
-            }
-        }
-        return errors;
-    },
-
-}
 
 /**
  * --------------------------
