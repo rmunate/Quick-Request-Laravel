@@ -17,6 +17,10 @@ Additionally, it offers a convenient approach for efficient file downloads by ef
 
 Forget about writing extra lines of code—experience the minimalist style of QuickRequest.
 
+## Documentation
+[![📖📖📖 **FULL DOCUMENTATION** 📖📖📖](https://img.shields.io/badge/FULL%20DOCUMENTATION-Visit%20Here-blue?style=for-the-badge)](https://rmunate.github.io/Quick-Request-Laravel/)
+
+
 ### Installation
 
 In order to utilize this tool, you need to have the `csrf-token` meta tag in your main template, as per the official Laravel documentation on [X-CSRF-TOKEN](https://laravel.com/docs/11.x/csrf#csrf-x-csrf-token). This value will be independently read by the `QuickRequest` package, so you should NOT include the `@csrf` directives in your forms or create hidden inputs with this value, as **the library handles it for you**.

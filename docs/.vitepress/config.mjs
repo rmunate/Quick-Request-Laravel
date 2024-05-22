@@ -9,7 +9,7 @@ export default defineConfig({
   themeConfig: {
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2021-2023 Raul Mauricio Uñate'
+      copyright: 'Copyright © 2021-2024 Raul Mauricio Uñate Castro'
     },
     editLink: {
       pattern: 'https://github.com/rmunate/Quick-Request-Laravel/tree/main/docs/:path'
@@ -73,12 +73,12 @@ export default defineConfig({
     ],
     ['meta', {
       property: 'og:image',
-      content: '/Quick-Request-Laravel/img/logo-github.png'
+      content: '/Quick-Request-Laravel/img/logo-github.jpg'
     }
     ],
     ['meta', {
       property: 'og:image:secure_url',
-      content: '/Quick-Request-Laravel/img/logo-github.png'
+      content: '/Quick-Request-Laravel/img/logo-github.jpg'
     }
     ],
     ['meta', {
@@ -107,9 +107,9 @@ export default defineConfig({
     }
     ],
     ['meta', {
-      property: 'og:type',
-      content: 'website'
-    }
+        property: 'og:type',
+        content: 'website'
+      }
     ]
   ],
 })
