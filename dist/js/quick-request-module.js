@@ -892,7 +892,7 @@ class QuickRequesHandler {
  * Blob Manager.
  * --------------------------
  */
-const QuickRequestBlobs = {
+export const QuickRequestBlobs = {
 
     config: {
         blob: null,
