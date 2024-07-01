@@ -1,8 +1,8 @@
 {
   "name": "quick-request-laravel",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Execute requests easily and quickly to the Laravel backend with QuickRequest, leave Ajax aside, now you have an easy, secure, and modern way of making requests.",
-  "main": "dist/js/quick-request-module.js",
+  "main": "dist/js/quick-request-module.min.js",
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
